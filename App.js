@@ -1,13 +1,21 @@
 import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import Login from './src/components/Login/Login';
 
 export default function App() {
+
+  const [user, setUser] = useState(null);
+
+  // se não tiver user mostra o login
+  if(!user){
+    return <Login />
+  }
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+      <SafeAreaView style={styles.container}>
+        <Text>Tela de tarefas</Text>
+      </SafeAreaView>
   );
 }
 
