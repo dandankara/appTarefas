@@ -1,7 +1,9 @@
 import React, { useState } from 'react'
 import { View, Text, SafeAreaView, StyleSheet, TextInput, TouchableOpacity, Button } from 'react-native'
+import firebase from '../../services/firebaseConnection'
 
-export default function Login() {
+
+export default function Login( {changeStatus} ) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
@@ -9,7 +11,33 @@ export default function Login() {
 
 
   function Login() {
-    alert('funciona karai')
+    // Verificação para ver qual metódo o user quer, logar ou cadastrar
+    if (type === 'login') {
+
+      // Faz a verificação por email e senha e loga no app
+      const user = firebase.auth().signInWithEmailAndPassword(email, password)
+        // then quando der certo
+        .then((user) => {
+          // quando fizer o login chamar essa propriedade passando o Id do cadastro
+          changeStatus(user.user.uid)
+        })
+        .catch((err) => {
+          console.log(err)
+          alert('Deu ruim')
+          return;
+        })
+    } else {
+      //Vai ser cadastrar
+      const user = firebase.auth().createUserWithEmailAndPassword(email, password)
+        .then((user) => {
+          changeStatus(user.user.uid)
+        })
+        .catch((err) => {
+          console.log(err)
+          alert('Deu ruim, tenta de novo')
+          return;
+        })
+    }
   }
 
   return (
