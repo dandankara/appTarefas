@@ -7,7 +7,7 @@ export default function TaskList({ data, deleteItem, editItem }) {
         <View style={styles.container}>
             {/* Esse touch, não apresenta nenhuma feedback VISUAL */}
             <TouchableWithoutFeedback onPress={() => editItem(data)}>
-                <Text style={styles.TextList}> {data.key}-{data.nome} </Text>
+                <Text style={styles.TextList}> {data.nome} </Text>
             </TouchableWithoutFeedback>
 
             <TouchableOpacity style={styles.ButtonDelete} onPress={() => deleteItem(data.key)}>

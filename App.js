@@ -1,20 +1,19 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
-import { SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View, FlatList } from 'react-native';
+import { SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View, FlatList, Keyboard } from 'react-native';
 import Login from './src/components/Login/Login';
 import TaskList from './src/components/TaskList/TaskList';
 
-let task = [
-  { key: '1', nome: 'Comprar Coca' },
-  { key: '2', nome: 'Comprar droga' },
-  { key: '3', nome: 'Comprar remédio' },
-  { key: '4', nome: 'Comprar remédio' },
-]
+import firebase from './src/services/firebaseConnection'
 
 export default function App() {
 
   const [user, setUser] = useState(null);
+
+  //Responsável por 'ver' quando alguem digita algo dentro do input
   const [newTask, setNewTask] = useState('')
+
+  const [addTask, setAddTask] = useState([])
 
   // se não tiver user mostra o login
   if (!user) {
@@ -22,12 +21,40 @@ export default function App() {
     return <Login changeStatus={(user) => setUser(user)} />
   }
 
-  
-  function DeleteItem(key){
+  function AddTarefa() {
+    if (newTask === '') {
+      alert('Preencha o campo, por favor');
+      // PS se não tiver esse return vai criar uma tarefa no bd com nome: ""
+      return;
+    }
+
+    // vai passar o user no child por conta da chave aleatória que vai gerar
+    let tarefasAdd = firebase.database().ref('tarefas').child(user);
+    let keyRandom = tarefasAdd.push().key;
+
+    tarefasAdd.child(keyRandom).set({
+      // aqui dentro vai ser oq vai ser cadastrado no bd
+      nome: newTask
+    })
+      .then(() => {
+        const data = {
+          key: keyRandom,
+          nome: newTask,
+        };
+
+        // pra add os que já tem e acrescentar mais uma
+        setAddTask(oldTasks => [...oldTasks, data])
+      })
+
+    Keyboard.dismiss()
+    setNewTask('')
+  }
+
+  function DeleteItem(key) {
     console.log(key)
   }
 
-  function EditItem(data){
+  function EditItem(data) {
     console.log(`Item Clicado ${data}`)
   }
 
@@ -41,13 +68,13 @@ export default function App() {
           style={styles.TextInput}
         />
 
-        <TouchableOpacity style={styles.ButttonAddTask}>
+        <TouchableOpacity style={styles.ButttonAddTask} onPress={AddTarefa}>
           <Text style={styles.TextButton}>+</Text>
         </TouchableOpacity>
       </View>
 
       <FlatList
-        data={task}
+        data={addTask}
         // KeyExtractor aponta na nossa lista qual é a chave única na nossa lista 
         keyExtractor={item => item.key}
         renderItem={({ item }) => (
