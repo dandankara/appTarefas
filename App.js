@@ -51,7 +51,16 @@ export default function App() {
   }
 
   function DeleteItem(key) {
-    console.log(key)
+    // vai acessar tarefas, dps o id e a tarefa que eu cliquei 
+    firebase.database().ref('tarefas').child(user).child(key).remove()
+    .then(() => {
+      // percorre toda a lista conforme oq eu passar
+      // procura todos os itens que são diferentes que eu estou querendo deletar
+      const FindTask = addTask.filter( item => item.key !== key)
+      setAddTask(FindTask)
+      alert('Deletada com sucesso')
+      return;
+    })
   }
 
   function EditItem(data) {
