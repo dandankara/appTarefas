@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View, FlatList, Keyboard } from 'react-native';
 import Login from './src/components/Login/Login';
 import TaskList from './src/components/TaskList/TaskList';
@@ -10,11 +10,13 @@ export default function App() {
 
   const [user, setUser] = useState(null);
 
+  const InputRef = useRef(null)
+
   //Responsável por 'ver' quando alguem digita algo dentro do input
   const [newTask, setNewTask] = useState('')
 
   const [addTask, setAddTask] = useState([])
-
+  const [key, setKey] = useState('')
   // se não tiver user mostra o login
   if (!user) {
     // Como eu vou passar algum user para o setUser, vai deixar de ser null e vai mostrar as Tarefas
@@ -26,6 +28,30 @@ export default function App() {
       alert('Preencha o campo, por favor');
       // PS se não tiver esse return vai criar uma tarefa no bd com nome: ""
       return;
+    }
+
+    // Verificar se o user quer editar
+    if(key !== ''){
+      firebase.database().ref('tarefas').child(user).child(key).update({
+        //oq vai ser att
+        nome: newTask        
+      })
+      .then(() => {
+        // vai procurar na minha lista de tarefa procurando a chave que estou clicando pra editar a tarefa
+        const IndexTask = addTask.findIndex(item => item.key === key)
+        let TaskClone = addTask;
+
+        TaskClone[IndexTask].nome = newTask
+
+        setNewTask([...TaskClone])
+         
+        alert('Tarefa atualizada com sucesso')
+      })
+
+      Keyboard.dismiss();
+      setNewTask('');
+      setKey('');
+      return; 
     }
 
     // vai passar o user no child por conta da chave aleatória que vai gerar
@@ -64,7 +90,11 @@ export default function App() {
   }
 
   function EditItem(data) {
-    console.log(`Item Clicado ${data}`)
+    setKey(data.key)
+    //levar o valor do item clicado para dentro do Input
+    setNewTask(data.nome)
+    //chama o teclado e foca no input 
+    InputRef.current.focus()
   }
 
   return (
@@ -75,6 +105,7 @@ export default function App() {
           value={newTask}
           onChangeText={(textInput) => setNewTask(textInput)}
           style={styles.TextInput}
+          ref={InputRef}
         />
 
         <TouchableOpacity style={styles.ButttonAddTask} onPress={AddTarefa}>
